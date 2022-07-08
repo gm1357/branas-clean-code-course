@@ -1,47 +1,63 @@
-// @ts-nocheck
-export function validate(cpf) {
-    if (isCpfStringInvalid(cpf)) return false;
+const DIGIT_1_FACTOR = 10;
+const DIGIT_2_FACTOR = 11;
 
-    const [sumDigits, fistValidatorDigit, secondValidatorDigit] = parseCpf(cpf);
+export class Cpf {
+    private cpf: string;
 
-    let digitsSum1 = 0;
-    let digitsSum2 = 0;
+    constructor(cpf: string) {
+        if (!this.validate(cpf)) {
+            throw new Error('Invalid CPF given!');
+        }
+        this.cpf = cpf;
+    }
 
-    for (let i = 0; i < sumDigits.length; i++) {
-        const currentDigit = parseInt(sumDigits[i]);
-        digitsSum1 = digitsSum1 + (10 - i) * currentDigit;
-        digitsSum2 = digitsSum2 + (11 - i) * currentDigit;
-    };
+    getValue() {
+        return this.cpf;
+    }
 
-    let rest = (digitsSum1 * 10) % 11;
-    const firstCalculatedDigit = rest === 10 ? 0 : rest;
+    private validate(cpf: string) {
+        if (this.isCpfStringInvalid(cpf)) return false;
+    
+        const [parsedCpf, fistValidatorDigit, secondValidatorDigit] = this.parseCpf(cpf);
+    
+        const digit1 = this.calculateDigit(parsedCpf, DIGIT_1_FACTOR);
+        if (String(digit1) !== fistValidatorDigit) return false;
+    
+        const digit2 = this.calculateDigit(parsedCpf, DIGIT_2_FACTOR);
+        return String(digit2) === secondValidatorDigit;
+    }
 
-    if (String(firstCalculatedDigit) !== fistValidatorDigit) return false;
+    private calculateDigit(cpf: string, factor: number) {
+		let total = 0;
 
-    digitsSum2 += 2 * firstCalculatedDigit;
-    rest = (digitsSum2 * 10) % 11;
-    const secondCalculatedDigit = rest === 10 ? 0 : rest;
+		for (const digit of cpf) {
+			if (factor > 1) {
+				total += parseInt(digit) * factor;
+                factor--;
+			}
+		}
 
-    return String(secondCalculatedDigit) === secondValidatorDigit;
-}
-
-function isCpfStringInvalid(cpf) {
-    return cpf === null
-        || cpf === undefined
-        || cpf.length < 11
-        || cpf.length > 14;
-}
-
-function parseCpf(cpf) {
-    const parsedCpf = cpf
-        .replace('.','')
-        .replace('.','')
-        .replace('-','')
-        .replace(' ','');
-
-    return [
-        parsedCpf.substring(0, parsedCpf.length - 2),
-        parsedCpf[parsedCpf.length - 2],
-        parsedCpf[parsedCpf.length - 1]
-    ];
+		const rest = total % 11;
+		return (rest < 2) ? 0 : 11 - rest;
+	}
+    
+    private isCpfStringInvalid(cpf: string) {
+        return !cpf
+            || cpf.length < 11
+            || cpf.length > 14;
+    }
+    
+    private parseCpf(cpf: string) {
+        const parsedCpf = cpf
+            .replace('.','')
+            .replace('.','')
+            .replace('-','')
+            .replace(' ','');
+    
+        return [
+            parsedCpf,
+            parsedCpf[parsedCpf.length - 2],
+            parsedCpf[parsedCpf.length - 1]
+        ];
+    }
 }

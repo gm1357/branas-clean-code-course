@@ -1,33 +1,34 @@
-import { validate } from '../src/cpf';
+import { Cpf } from '../src/cpf';
 
-test('should return true to valid cpfs', () => {
-    let validCpf = '391.013.790-38';
-    expect(validate(validCpf)).toBe(true);
-    validCpf = '947.484.030-04';
-    expect(validate(validCpf)).toBe(true);
-    validCpf = '89936276060';
-    expect(validate(validCpf)).toBe(true);
-});
+describe('Cpf', () => {
+    const validCpfs = [
+        '391.013.790-38',
+        '947.484.030-04',
+        '89936276060'
+    ];
+    const invalidCpfs = [
+        '391.013.791-38'
+    ];
+    const invalidStrings = [
+        '',
+        'a',
+        '123',
+        '123sddadwqdd1d2d',
+        'ggggggggggg',
+        'abcdefghijklmn',
+        '````````'
+    ];
 
-test('should return false to invalid cpf', () => {
-    const invalidCpf = '391.013.791-38';
-    expect(validate(invalidCpf)).toBe(false);
-});
-
-test('should return false to null cpf', () => {
-    expect(validate(null)).toBe(false);
-});
-
-test('should return false to undefined cpf', () => {
-    expect(validate(undefined)).toBe(false);
-});
-
-test('should return false to invalid strings', () => {
-    expect(validate('')).toBe(false);
-    expect(validate('a')).toBe(false);
-    expect(validate('123')).toBe(false);
-    expect(validate('123sddadwqdd1d2d')).toBe(false);
-    expect(validate('ggggggggggg')).toBe(false);
-    expect(validate('abcdefghijklmn')).toBe(false);
-    expect(validate('````````')).toBe(false);
+    it.each(validCpfs)('should return true to valid cpfs', (validCpf) => {
+        const cpf = new Cpf(validCpf);
+        expect(cpf.getValue()).toBe(validCpf);
+    });
+    
+    it.each(invalidCpfs)('should return false to invalid cpf', (invalidCpf) => {
+        expect(() => new Cpf(invalidCpf)).toThrow();
+    });
+    
+    it.each(invalidStrings)('should return false to invalid strings', (invalidString) => {
+        expect(() => new Cpf(invalidString)).toThrow();
+    });
 });
